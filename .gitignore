@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv
+
+# Runtime caches (auto-downloaded / auto-generated)
+.cache/
+.mempalace/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+# Runtime data — but persona knowledge files are configuration, keep them
+data/*
+!data/knowledge/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Testing/Temp
+curl_output*.txt
+embed_test.py
+test_embedder.py
+test_faiss.py
+verify_channel_flow.py
+memory.json
+*.png
+.hermes/
+
+# Per-user runtime state (talkprep active-talk context, etc.)
+state/
+
+# talkmaster runtime config (box-local)
+.talkmaster_config.yaml

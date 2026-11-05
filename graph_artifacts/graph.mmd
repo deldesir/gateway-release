@@ -1,0 +1,19 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	conversation_node(conversation_node)
+	retrieve_context(retrieve_context)
+	summarize_context_node(summarize_context_node)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> conversation_node;
+	conversation_node -.-> __end__;
+	conversation_node -. &nbsp;tools&nbsp; .-> retrieve_context;
+	retrieve_context --> summarize_context_node;
+	summarize_context_node --> conversation_node;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

@@ -1,0 +1,316 @@
+{
+  "version": "13",
+  "site": "https://box",
+  "flows": [
+    {
+      "name": "Onboarding",
+      "uuid": "f52bcc60-9501-4785-9c71-3812287e3e60",
+      "spec_version": "14.4.0",
+      "language": "eng",
+      "type": "messaging",
+      "nodes": [
+        {
+          "uuid": "5b49f40d-9137-4ed4-a0b6-8a00070af363",
+          "actions": [
+            {
+              "uuid": "586dbc0a-1f8a-4011-8f77-dab1db0ce469",
+              "type": "send_msg",
+              "text": "\ud83e\udd16 *Hermes is thinking...*",
+              "attachments": []
+            },
+            {
+              "type": "call_llm",
+              "uuid": "4b956ad5-e869-4864-a1f2-439c8dc9b142",
+              "llm": {
+                "uuid": "81f4e231-e52d-4f94-aef1-f60999d17c47",
+                "name": "Alva"
+              },
+              "input": "@contact.name (@contact.urn > @contact.channel) says: @input [msg_id:@input.external_id]",
+              "instructions": ".",
+              "output_local": "_llm_output"
+            }
+          ],
+          "router": {
+            "type": "switch",
+            "categories": [
+              {
+                "uuid": "ad672b02-fff8-44be-9b6c-360a133443f4",
+                "name": "Success",
+                "exit_uuid": "a3dd8056-e586-4e01-94df-25d73e6f114a"
+              },
+              {
+                "uuid": "67e55876-a7da-4080-8382-e50dc20f9e84",
+                "name": "Failure",
+                "exit_uuid": "bb384944-d86b-46ab-889c-f27f9cfa3948"
+              }
+            ],
+            "default_category_uuid": "67e55876-a7da-4080-8382-e50dc20f9e84",
+            "operand": "@locals._llm_output",
+            "cases": [
+              {
+                "uuid": "32da1dd9-1a7a-4603-8377-854193eaa9a7",
+                "type": "has_text",
+                "arguments": [],
+                "category_uuid": "ad672b02-fff8-44be-9b6c-360a133443f4"
+              }
+            ]
+          },
+          "exits": [
+            {
+              "uuid": "a3dd8056-e586-4e01-94df-25d73e6f114a",
+              "destination_uuid": "4a8a3f8e-8ebf-4a16-9f02-136460865bff"
+            },
+            {
+              "uuid": "bb384944-d86b-46ab-889c-f27f9cfa3948",
+              "destination_uuid": "eac8d64d-869e-41b2-aa75-b163bf893ecd"
+            }
+          ]
+        },
+        {
+          "uuid": "721dbf77-a5fd-407c-82f9-92050b82a65d",
+          "actions": [],
+          "exits": [
+            {
+              "uuid": "308ec819-1698-4612-962a-b11d6b3efcd1",
+              "destination_uuid": "279b25e7-3dea-417c-9c2c-8c8518495695"
+            },
+            {
+              "uuid": "48818705-863c-43f2-8ce4-55cc393a8062",
+              "destination_uuid": "5b49f40d-9137-4ed4-a0b6-8a00070af363"
+            },
+            {
+              "uuid": "abd5ff81-b725-4c4c-8850-88f0007d59a1",
+              "destination_uuid": "e304c9aa-6f17-4b97-b9e4-031a0d368241"
+            }
+          ],
+          "router": {
+            "type": "switch",
+            "categories": [
+              {
+                "uuid": "8cef2541-4d29-4d17-b6e2-41468f33fea1",
+                "name": "Stop",
+                "exit_uuid": "308ec819-1698-4612-962a-b11d6b3efcd1"
+              },
+              {
+                "uuid": "bcec30bf-2403-41dd-80b2-5943b3e02a4c",
+                "name": "Other",
+                "exit_uuid": "48818705-863c-43f2-8ce4-55cc393a8062"
+              },
+              {
+                "uuid": "0eeb2472-8b9e-4f76-bcda-3452f0e0a5a7",
+                "name": "No Response",
+                "exit_uuid": "abd5ff81-b725-4c4c-8850-88f0007d59a1"
+              }
+            ],
+            "default_category_uuid": "bcec30bf-2403-41dd-80b2-5943b3e02a4c",
+            "operand": "@input.text",
+            "cases": [
+              {
+                "uuid": "a2ad49d9-22bd-479d-8363-d49bab7319f0",
+                "type": "has_only_text",
+                "arguments": [
+                  "stop"
+                ],
+                "category_uuid": "8cef2541-4d29-4d17-b6e2-41468f33fea1"
+              }
+            ],
+            "result_name": "Result",
+            "wait": {
+              "type": "msg",
+              "timeout": {
+                "seconds": 600,
+                "category_uuid": "0eeb2472-8b9e-4f76-bcda-3452f0e0a5a7"
+              }
+            }
+          }
+        },
+        {
+          "uuid": "4a8a3f8e-8ebf-4a16-9f02-136460865bff",
+          "actions": [],
+          "exits": [
+            {
+              "uuid": "5f5cb5d5-08d6-4b7d-adeb-73fa6fcfe218",
+              "destination_uuid": null
+            },
+            {
+              "uuid": "48b80c34-e0d5-4a19-a598-754d1c3440c6",
+              "destination_uuid": "281fd55a-70b1-47ff-9fe5-b17f7c98a4d8"
+            }
+          ],
+          "router": {
+            "type": "switch",
+            "categories": [
+              {
+                "uuid": "3f9c532b-3ff2-454b-8a4f-13a359fb1a16",
+                "name": "{{noreply}}",
+                "exit_uuid": "5f5cb5d5-08d6-4b7d-adeb-73fa6fcfe218"
+              },
+              {
+                "uuid": "71e0ca4b-4158-42b5-9c38-7d304310e6de",
+                "name": "Other",
+                "exit_uuid": "48b80c34-e0d5-4a19-a598-754d1c3440c6"
+              }
+            ],
+            "default_category_uuid": "71e0ca4b-4158-42b5-9c38-7d304310e6de",
+            "operand": "@locals._llm_output",
+            "cases": [
+              {
+                "uuid": "743e55d7-f391-4432-90b3-0735367f3fbc",
+                "type": "has_all_words",
+                "arguments": [
+                  "{{noreply}}"
+                ],
+                "category_uuid": "3f9c532b-3ff2-454b-8a4f-13a359fb1a16"
+              }
+            ]
+          }
+        },
+        {
+          "uuid": "281fd55a-70b1-47ff-9fe5-b17f7c98a4d8",
+          "actions": [
+            {
+              "uuid": "9d290ba1-2902-4b6c-be23-0159c96289c7",
+              "type": "send_msg",
+              "text": "@locals._llm_output",
+              "attachments": []
+            }
+          ],
+          "exits": [
+            {
+              "uuid": "61d1c653-c606-43e1-920d-5583cd9cdac8",
+              "destination_uuid": "721dbf77-a5fd-407c-82f9-92050b82a65d"
+            }
+          ]
+        },
+        {
+          "uuid": "279b25e7-3dea-417c-9c2c-8c8518495695",
+          "actions": [
+            {
+              "uuid": "d87815ee-9330-4832-a1d6-25fa1fddafdb",
+              "type": "add_contact_groups",
+              "groups": [
+                {
+                  "uuid": "b9cf0dba-b61e-4c4d-a10a-3edddd7b6ded",
+                  "name": "Stop"
+                }
+              ]
+            }
+          ],
+          "exits": [
+            {
+              "uuid": "224f639a-527a-4d62-868a-c7d85f03b0b0",
+              "destination_uuid": null
+            }
+          ]
+        },
+        {
+          "uuid": "e304c9aa-6f17-4b97-b9e4-031a0d368241",
+          "actions": [
+            {
+              "uuid": "29fe68ea-9362-4b7d-bca8-d542f9b3d49f",
+              "type": "send_msg",
+              "text": "\u23f1\ufe0f Session timed out due to inactivity.\n\nSend *awake* to start a new conversation.",
+              "attachments": []
+            }
+          ],
+          "exits": [
+            {
+              "uuid": "58f92a90-58e2-4030-8a6b-dc29b449a5f4",
+              "destination_uuid": null
+            }
+          ]
+        },
+        {
+          "uuid": "eac8d64d-869e-41b2-aa75-b163bf893ecd",
+          "actions": [
+            {
+              "uuid": "c0d36cdf-d863-4993-aa59-aa3150e868a9",
+              "type": "send_msg",
+              "text": "\u26a0\ufe0f I'm having trouble connecting to the AI right now.\n\nPlease try again in a moment by sending any message.",
+              "attachments": []
+            }
+          ],
+          "exits": [
+            {
+              "uuid": "dde835d8-ed66-489c-af95-1ae89af94174",
+              "destination_uuid": "721dbf77-a5fd-407c-82f9-92050b82a65d"
+            }
+          ]
+        }
+      ],
+      "_ui": {
+        "nodes": {
+          "5b49f40d-9137-4ed4-a0b6-8a00070af363": {
+            "position": {
+              "left": 0,
+              "top": 0
+            },
+            "type": "split_by_llm",
+            "config": {}
+          },
+          "4a8a3f8e-8ebf-4a16-9f02-136460865bff": {
+            "position": {
+              "left": 20,
+              "top": 220
+            },
+            "type": "split_by_expression",
+            "config": {
+              "localizeRules": false,
+              "localizeCategories": false
+            }
+          },
+          "281fd55a-70b1-47ff-9fe5-b17f7c98a4d8": {
+            "position": {
+              "left": 280,
+              "top": 260
+            },
+            "type": "execute_actions",
+            "config": {}
+          },
+          "721dbf77-a5fd-407c-82f9-92050b82a65d": {
+            "position": {
+              "left": 320,
+              "top": 40
+            },
+            "type": "wait_for_response",
+            "config": {
+              "localizeRules": false,
+              "localizeCategories": false
+            }
+          },
+          "279b25e7-3dea-417c-9c2c-8c8518495695": {
+            "position": {
+              "left": 60,
+              "top": 400
+            },
+            "type": "execute_actions",
+            "config": {}
+          },
+          "e304c9aa-6f17-4b97-b9e4-031a0d368241": {
+            "position": {
+              "left": 500,
+              "top": 500
+            },
+            "type": "execute_actions",
+            "config": {}
+          },
+          "eac8d64d-869e-41b2-aa75-b163bf893ecd": {
+            "position": {
+              "left": -300,
+              "top": 100
+            },
+            "type": "execute_actions",
+            "config": {}
+          }
+        },
+        "editor": "0.156.6"
+      },
+      "revision": 19,
+      "expire_after_minutes": 720
+    }
+  ],
+  "campaigns": [],
+  "triggers": [],
+  "fields": [],
+  "groups": []
+}

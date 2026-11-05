@@ -1,0 +1,86 @@
+[project]
+name = "ai-gateway"
+version = "0.3.0"
+description = "AI Gateway - Unified agentic backend for IIAB"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "fastapi>=0.128.0",
+    "httpx>=0.27.0",
+    "loguru>=0.7.3",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
+    "uvicorn>=0.40.0",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.0",
+    "fsrs>=4.0.0",
+    "sqlmodel>=0.0.16",
+    "aiosqlite",
+    # Domain libraries (the talk-preparation pair is an extra: the pipeline box installs it,
+    # a shop's box in the retail profile does not; every import of them is lazy)
+    "rapidpro-python",
+    # V2 — Hermes Agent + MemPalace (in-process, not services)
+    "hermes-agent",
+    "anthropic==0.87.0",     # Hermes' native Anthropic provider (HERMES_PROVIDER=anthropic); pin follows hermes-agent
+    "mempalace",
+    "tenacity>=9.0.0",
+    # ── Security pins (transitive deps with known CVEs / Dependabot) ──
+    "aiohttp>=3.13.3",       # CVE-2025-69223..69230
+    "urllib3>=2.6.3",        # CVE-2026-21441
+    "protobuf>=5.29.6,<7",   # CVE-2026-0994; capped <7 (breaks chromadb's opentelemetry-proto)
+    "langsmith>=0.8.18",     # raised from 0.6.3 — Dependabot high (unused, but transitively pulled)
+    "filelock>=3.20.3",      # CVE-2026-22701
+    "cryptography>=48.0.1",  # Dependabot high
+    "tornado>=6.5.6",        # Dependabot high
+    "GitPython>=3.1.50",     # Dependabot high
+    "lxml>=6.1.0",           # Dependabot high
+    "Mako>=1.3.12",          # Dependabot high
+    "PyJWT>=2.13.0",         # Dependabot high
+    "python-multipart>=0.0.30",  # Dependabot high
+    "msgpack>=1.2.1",        # Dependabot high
+    "starlette>=1.3.1",      # Dependabot high (fastapi-compatible)
+    "opentelemetry-proto>=1.30.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.30.0",
+    "segno>=1.6.6",
+    "greenlet>=3",
+    "psycopg[binary]>=3.2",
+]
+
+[project.optional-dependencies]
+talkprep = ["jwlinker", "talkmaster"]
+
+[tool.uv]
+# the gateway runs on Linux only; hermes-agent 0.22.6 pins pillow inconsistently for Windows splits
+environments = ["sys_platform == 'linux'"]
+# hermes-agent pins certifi to one release because it trusts the OS store, not the bundle;
+# the gateway's own clients use the bundle, which must drop compromised roots promptly
+# hermes-agent 0.22.6 overrides Pillow to 13.0.0 in its own [tool.uv] (browser-harness 0.1.13 pins 12.3.0);
+# a dependency's overrides do not reach the project that installs it, so the same override lives here
+override-dependencies = ["certifi>=2026.10.19", "Pillow==13.0.0"]
+
+[tool.uv.sources]
+jwlinker = { path = "/opt/iiab/jwlinker", editable = true }
+talkmaster = { path = "/opt/iiab/talkmaster", editable = true }
+hermes-agent = { path = "/opt/iiab/hermes-agent", editable = true }
+mempalace = { path = "/opt/iiab/mempalace", editable = true }
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.3.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]

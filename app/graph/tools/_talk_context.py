@@ -12,17 +12,35 @@ from __future__ import annotations
 import os
 from typing import Optional
 
-from talkmaster.context import ContextStore
+try:
+    from talkmaster.context import ContextStore
+except ImportError:          # a box without the talk-prep engine (a shop's retail profile): no active-talk memory
+    ContextStore = None
+
+
+class _NoStore:
+    """The store on a box without the engine: remembers nothing, refuses nothing."""
+
+    @staticmethod
+    def key(user_id):
+        return str(user_id or "")
+
+    def get(self, user_id):
+        return {"talk_id": None, "revision_name": None, "pub": None, "section": None}
+
+    def __getattr__(self, name):          # set_talk, set_revision, set_pub, set_section, clear
+        return lambda *a, **k: None
+
 
 _STORE = os.path.abspath(os.getenv(
     "TALKPREP_CONTEXT_FILE",
     os.path.join(os.path.dirname(__file__), "..", "..", "..", "state", "talkprep_context.json"),
 ))
-_store = ContextStore(_STORE)
+_store = ContextStore(_STORE) if ContextStore else _NoStore()
 
 
 def _key(user_id: Optional[str]) -> str:
-    return ContextStore.key(user_id)
+    return (ContextStore or _NoStore).key(user_id)
 
 
 def get(user_id: Optional[str]) -> dict:

@@ -35,17 +35,20 @@ T = {
         "help": (
             "🎙️ *Preparasyon diskou*\n"
             "Ou toujou pale de yon diskou ak nimewo l, jan l ye sou plan an.\n\n"
-            "*1. Chwazi diskou a.* Diskou mwen yo · Chwazi yon diskou · Ajoute yon diskou.\n"
-            "*2. Prepare l.* Kreye yon vèsyon pou oditwa a; di mesaj santral ou nan yon fraz (fil wouj la).\n"
-            "*3. Ekri, epi resevwa defi.* Ekri bouyon w nan SiYuan, apre sa mande yon defi sou chak seksyon. Bouyon AI a sèvi pou konpare sèlman.\n"
-            "*4. Evalye.* Bay tèt ou yon nòt anvan; apre sa grily a evalye bouyon w.\n"
-            "*5. Repete.* Konsèy pou livrezon; voye yon nòt vokal pou tan an.\n"
-            "*6. Ekspòte.* Rasanble maniskri a.\n\n"
+            "*1. Kòmanse.* Prepare diskou a pou dimanch li (prepare diskou 75 pou 2026-12-27), oswa chwazi youn ki la deja.\n"
+            "*2. Di mesaj santral ou.* Nan yon sèl fraz, ak mo pa w, sa diskou a ye (fil wouj la). Tout rès la depann de li. Apre sa chwazi youn oswa de leson pou w travay (leson 8 12).\n"
+            "*3. Ekri nòt pa w.* Nan SiYuan, pou chak pati: premye minit la, fraz kle yo ak dènye minit la an antye; twa mo pa liy pou rès la. Nòt, pa yon diskou ekri mo pou mo.\n"
+            "*4. Mande yon defi.* Antrenè a poze kesyon sou mo pa w yo; li pa janm ekri pou ou. Reponn alekri, korije, mande ankò.\n"
+            "*5. Evalye.* Bay tèt ou yon nòt anvan; apre sa, m li bouyon w sou 20 leson bwochi ansèyman an, chak leson ak yon fraz ki soti nan tèks pa w.\n"
+            "*6. Repete.* Pale sou nòt ou yo epi voye yon nòt vokal: m mezire tan an ak poz yo; se ou ki bay nòt livrezon an.\n"
+            "*7. Ekspòte.* Rasanble maniskri w lè gen yon vrè repetisyon.\n"
+            "*8. Jou apre a.* Bilan: sa k pase byen, sa k pa pase, yon nòt sou chak leson; make yon leson metrize lè w posede l; gade pwogrè w.\n\n"
             "Gid konplè: SiYuan › Life › Gid — Preparasyon Diskou."
         ),
         # status
         "no_talks": "🎙️ *Poko gen diskou.*\nAjoute youn ak nimewo plan li (Ajoute yon diskou), oswa gade piblikasyon yo.",
         "status_title": "🎙️ *Diskou ou yo*",
+        "active_line": "🎙️ Diskou {handle} — {title}",
         "status_talk": "\n*Diskou {handle}* — {title}{active}",
         "active_mark": " · aktif",
         "status_no_revision": "   poko gen vèsyon",
@@ -103,25 +106,67 @@ T = {
         "verdict_high": "ou te bay tèt ou plis; etidye pwen fèb yo",
         "verdict_low": "ou te bay tèt ou mwens; fè konfyans ak fòs ou yo",
         "eval_missing": "⚠️ Poko ekri (pa evalye): {missing}",
-        "eval_next": "\nMande nòt yo pa kategori lè w vle.",
+        "eval_focus": "🎯 Travay sou pwen sa yo anvan: {points}.",
+        "eval_next": "\nMande nòt yo pa leson lè w vle.",
         "scores_none": "Poko gen nòt pou « {name} ». Fè evalyasyon an anvan.",
         "scores_title": "📊 *Nòt pou « {name} »*",
+        "scores_point": "• {unit} {n}, {title}: {bar} {score:.1f}/5",
+        "scores_weak": "(fèb: {weak})",
         "scores_overall": "\n*Total: {overall:.1f}/5*",
-        "scores_tip_low": "💡 Konsantre w sou kontni ak lojik, epi sou vwa a, anvan.",
-        "scores_tip_mid": "💡 Bon baz; travay sou kontak ak oditwa a.",
-        "scores_tip_high": "🌟 Ekselan! Pare pou repete.",
+        "scores_focus": "🎯 De pwen pou w travay jiska pwochen evalyasyon an: {points}.",
         # rehearsal
         "rehearsal_title": "🎤 *Repetisyon #{n}: konsèy pou « {name} »*\n\n{cues}",
         "audio_ask": "🎤 Voye m yon nòt vokal repetisyon w (oswa lyen l), epi di m ki seksyon li ye.",
         "whole_talk": "tout diskou a",
         "audio_title": "🎤 *Repetisyon analize — {label}*",
         "audio_timing": "⏱ {m}:{s:02d} sou {target} min → tan {stars} ({score}/10)",
+        "audio_free": "⏱ {m}:{s:02d}",
         "audio_pauses": "⏸ {n} poz, pi long lan {longest:.1f} s",
         "audio_no_pauses": "💡 Pa gen poz ki depase 0,6 s: oditwa a bezwen silans pou kenbe pwen yo. Kote w ap mete yo?",
         "audio_long_gap": "💡 Yon twou {gap:.0f} s: yon poz ki vle di yon bagay, oswa fil la ki pèdi? Se ou ki konnen.",
         "audio_continuous": "💡 Ou pale prèske san rete; kite plas pou respire.",
         "audio_footer": "_Kounye a bay tèt ou yon nòt onèt sou livrezon an (vwa, jès, kontak je)._",
         # export, cost, deck, notebook
+        # the loop: prepare, focus, draft, answer, model, rate, debrief, mastery, progress
+        "prepare_ask_date": "📅 Pou ki dimanch? Bay dat la (egzanp 2026-12-27).",
+        "prepare_ok": "✅ *Diskou {handle} ap prepare* — {title}\nDimanch {date}, nan {days} jou. Vèsyon « {name} ».\nApre sa: di mesaj santral ou nan yon fraz (fil wouj la), epi chwazi youn oswa de leson pou w travay.",
+        "prepare_exists": "📌 Diskou {handle} pou {date} ap prepare deja (« {name} »); se li ki aktif kounye a.",
+        "focus_ask": "🎯 Ki leson, youn oswa de? Di nimewo yo (1 a 20), egzanp 8 12, oswa 8-45 pou yon sou-pwen.",
+        "section_ask": "🤔 Ki pati? Di nimewo l (egzanp 1), oswa yon mo nan tit li.",
+        "focus_propose": "🎯 Dapre dènye bilan w, m ta pwopoze: {points}. Di nimewo ou chwazi yo.",
+        "focus_bad": "⚠️ Di youn oswa de leson, 1 a 20 (egzanp 8 12). Yon sou-pwen dwe fè pati leson l (8-45).",
+        "focus_set": "🎯 *Leson pou « {name} »:* {points}\n\nSa bwochi a di pou yo:\n{leads}\n\nChak defi ap gade yo anvan.",
+        "draft_ask": "✍️ Di m ki pati, ak mo pou m ajoute yo.",
+        "draft_ok": "✍️ Ajoute nan « {section} » ({words} mo). Pati ki ekri: {drafted}/{total}.",
+        "answer_ask": "✍️ Ki kesyon, ak repons ou? Egzanp: repons 1, epi mo pa w yo.",
+        "answer_none_open": "✅ Pa gen kesyon ki rete sou « {section} »; mande yon lòt defi.",
+        "answer_which": "🤔 « {section} » gen {left} kesyon ki rete; di kilès, 1 a {left}.",
+        "answer_ok": "✅ Repons lan sove. Rete {left} kesyon sou « {section} ».",
+        "answer_ok_clear": "✅ Repons lan sove; pa gen kesyon ki rete sou « {section} ». Korije bouyon w, apre sa mande yon lòt defi, oswa tèks modèl la.",
+        "model_ok": "🧪 *Tèks modèl pou « {section} »* nan jounal antrènman pati a, bò kote bouyon w. Li l fas ak pa w: kisa l fè ou pa t fè? Pa janm bay li jan l ye a.",
+        "model_gate_draft": "✍️ Ekri bouyon pa w pou « {section} » anvan; tèks modèl la se pou konpare ak mo pa w.",
+        "model_gate_challenge": "🥊 Mande yon defi sou « {section} » epi reponn li anvan; tèks modèl la vini apre yon defi ou fin reponn.",
+        "model_gate_answers": "❓ Reponn kesyon ki rete sou « {section} » anvan; tèks modèl la ap tann repons ou yo.",
+        "rate_ask": "🎤 Bay tèt ou yon nòt 1 a 5 pa pwen, egzanp: bay nòt 8=4 13=3.",
+        "rate_ok": "✅ {n} nòt sove, se pa w yo:",
+        "rate_unknown": "🤔 Pwen m pa konnen: {points}. Leson yo ale 1 a 20; pwen otokontwòl yo se 2, 3, 4, 8, 12, 13, 15, 16, 17, 29.",
+        "audio_rate": "_Kounye a bay tèt ou yon nòt, 1 a 5 pa pwen: {points}. Reponn: bay nòt 8=4 13=3._",
+        "eval_deck": "🧠 Kat memwa yo refè nan SiYuan: fil wouj la ak eskelèt la, pou w repete awotvwa.",
+        "debrief_no_date": "📅 Vèsyon sa a pa gen dimanch; bilan an vini apre diskou a fin bay.",
+        "debrief_too_soon": "📅 Diskou a se {date}, nan {days} jou; bilan an vini jou apre a.",
+        "debrief_ask": "📝 Twa repons: sa k te pase byen, sa k pa t pase, epi 1 a 5 sou chak leson ou te chwazi. Nan chat: bilan sa k pase byen | sa k pa pase | 8=4 14=2.",
+        "debrief_ok": "📝 *Bilan sove pou « {name} ».* Diskou a make kòm bay.",
+        "debrief_rate_focus": "Rete pou w bay nòt, 1 a 5: {points}. Reponn: bay nòt 8=4.",
+        "debrief_next": "Apre sa: make yon leson metrize lè w fin posede l (metrize 8), epi gade pwogrè w.",
+        "mastered_ask": "🏁 Ki leson, 1 a 20? Egzanp: metrize 8.",
+        "mastered_needs_debrief": "🏁 Metrize vini apre bilan diskou a; bay twa repons yo anvan.",
+        "mastered_ok": "🏁 Make kòm metrize: {point}. Konsèy kongregasyon an ap di rès la.",
+        "progress_none": "📈 Poko gen anyen. Pwogrè a kòmanse ak yon leson ou chwazi, yon evalyasyon oswa yon nòt repetisyon.",
+        "progress_title": "📈 *Pwogrè w, leson pa leson*",
+        "progress_focused": "chwazi {n} fwa",
+        "progress_score": "tèks {score}/5",
+        "progress_self": "ou menm {score}/5",
+        "progress_mastered": "metrize {date}",
         "export_ok": "✅ *Maniskri a rasanble pou « {name} »*\nGade l nan SiYuan: {url}\n\nApre sa: kat memwa (Zouti etid › Kat Anki), oswa nòt nan SiYuan.",
         "export_failed": "⚠️ Mwen pa t ka rasanble maniskri « {name} ».",
         "cost": "💰 *Depans AI sesyon sa a*\nMo ki antre: {prompt:,}\nMo ki soti: {completion:,}\nTotal: {total:,}\nEstimasyon: ~${usd:.4f}",
@@ -140,16 +185,19 @@ T = {
         "help": (
             "🎙️ *Talk preparation*\n"
             "You always name a talk by its number, as it is on the outline.\n\n"
-            "*1. Choose the talk.* My Talks · Choose a talk · Add a talk.\n"
-            "*2. Set it up.* Create a version for the audience; say your central message in one sentence (the thread).\n"
-            "*3. Draft, then get challenged.* Write your draft in SiYuan, then ask for a challenge on each section. The AI draft is for comparison only.\n"
-            "*4. Evaluate.* Score yourself first; then the rubric scores your draft.\n"
-            "*5. Rehearse.* Delivery cues; send a voice note for timing.\n"
-            "*6. Export.* Assemble the manuscript.\n\n"
+            "*1. Start.* Prepare the talk for its Sunday (prepare talk 75 for 2026-12-27), or choose one already there.\n"
+            "*2. Say your central message.* In one sentence, in your words, what the talk is about (the thread). Everything else rests on it. Then choose one or two study points to work on (set focus 8 12).\n"
+            "*3. Write your own notes.* In SiYuan, for each part: your first minute, your key sentences and your last minute in full; three words a line for the rest. Notes, never a script.\n"
+            "*4. Ask for a challenge.* The coach questions your words; it never writes them. Answer in writing, revise, ask again.\n"
+            "*5. Evaluate.* Give your own score first; then I read your draft on the teaching brochure's twenty study points, each with a line from your own text.\n"
+            "*6. Rehearse.* Speak from your notes and send a voice note: I measure the time and the pauses; you rate the delivery yourself.\n"
+            "*7. Export.* Assemble your manuscript once a real rehearsal exists.\n"
+            "*8. The day after.* The debrief: what landed, what did not, a rating on each focus point; mark a point mastered once you own it; look at your progress.\n\n"
             "Full guide: SiYuan › Life › Gid — Preparasyon Diskou."
         ),
         "no_talks": "🎙️ *No talks yet.*\nAdd one by its outline number (Add a talk), or look at the publications.",
         "status_title": "🎙️ *Your talks*",
+        "active_line": "🎙️ Talk {handle} — {title}",
         "status_talk": "\n*Talk {handle}* — {title}{active}",
         "active_mark": " · active",
         "status_no_revision": "   no version yet",
@@ -201,23 +249,65 @@ T = {
         "verdict_high": "you rated yourself higher; study the weak points",
         "verdict_low": "you rated yourself lower; trust your strengths more",
         "eval_missing": "⚠️ Not drafted yet (not scored): {missing}",
-        "eval_next": "\nAsk for the scores by category whenever you want.",
+        "eval_focus": "🎯 Work on these points first: {points}.",
+        "eval_next": "\nAsk for the scores by study point whenever you want.",
         "scores_none": "No scores yet for “{name}”. Evaluate first.",
         "scores_title": "📊 *Scores for “{name}”*",
+        "scores_point": "• {unit} {n}, {title}: {bar} {score:.1f}/5",
+        "scores_weak": "(weak: {weak})",
         "scores_overall": "\n*Overall: {overall:.1f}/5*",
-        "scores_tip_low": "💡 Focus on content and logic, and on the voice, first.",
-        "scores_tip_mid": "💡 Good foundation; work on the connection with the audience.",
-        "scores_tip_high": "🌟 Excellent! Ready to rehearse.",
+        "scores_focus": "🎯 Two to work on until the next evaluation: {points}.",
         "rehearsal_title": "🎤 *Rehearsal #{n}: cues for “{name}”*\n\n{cues}",
         "audio_ask": "🎤 Send me a voice note of your rehearsal (or its link), and tell me which section it is.",
         "whole_talk": "whole talk",
         "audio_title": "🎤 *Rehearsal analysed — {label}*",
         "audio_timing": "⏱ {m}:{s:02d} against {target} min → timing {stars} ({score}/10)",
+        "audio_free": "⏱ {m}:{s:02d}",
         "audio_pauses": "⏸ {n} pause(s), longest {longest:.1f} s",
         "audio_no_pauses": "💡 No pause over 0.6 s: the audience needs silence to keep the points. Where will you plant them?",
         "audio_long_gap": "💡 A {gap:.0f} s gap: a pause that means something, or a lost thread? Only you know.",
         "audio_continuous": "💡 Near-continuous speech; leave room to breathe.",
         "audio_footer": "_Now rate your delivery honestly (voice, gestures, eye contact)._",
+        # the loop: prepare, focus, draft, answer, model, rate, debrief, mastery, progress
+        "prepare_ask_date": "📅 For which Sunday? Give the date (e.g. 2026-12-27).",
+        "prepare_ok": "✅ *Talk {handle} is being prepared* — {title}\nSunday {date}, in {days} days. Version “{name}”.\nNext: say your central message in one sentence (the thread), then choose one or two study points to work on.",
+        "prepare_exists": "📌 Talk {handle} for {date} is already being prepared (“{name}”); it is your active talk now.",
+        "focus_ask": "🎯 Which study points, one or two? Say their numbers (1 to 20), e.g. 8 12, or 8-45 for one sub-criterion.",
+        "section_ask": "🤔 Which part? Say its number (e.g. 1), or a word of its title.",
+        "focus_propose": "🎯 From your last debrief, I would propose: {points}. Say the numbers you choose.",
+        "focus_bad": "⚠️ Name one or two study points, 1 to 20 (e.g. 8 12). A sub-criterion must belong to its point (8-45).",
+        "focus_set": "🎯 *Focus for “{name}”:* {points}\n\nThe brochure's own leads for them:\n{leads}\n\nEvery challenge weighs these first.",
+        "draft_ask": "✍️ Tell me the part, and the words to add.",
+        "draft_ok": "✍️ Added to “{section}” ({words} words). Parts drafted: {drafted}/{total}.",
+        "answer_ask": "✍️ Which question, and your answer? E.g. answer 1, then your words.",
+        "answer_none_open": "✅ No open question on “{section}”; ask for the next challenge.",
+        "answer_which": "🤔 “{section}” has {left} open question(s); say which one, 1 to {left}.",
+        "answer_ok": "✅ Answered. {left} open question(s) left on “{section}”.",
+        "answer_ok_clear": "✅ Answered; nothing left open on “{section}”. Revise your draft, then ask for another challenge, or the model text.",
+        "model_ok": "🧪 *Model text for “{section}”* is in the part's coaching log, beside your draft. Read it against yours: what did it do that you did not? Never deliver it.",
+        "model_gate_draft": "✍️ Write your own draft of “{section}” first; the model text is a comparison for your words.",
+        "model_gate_challenge": "🥊 Ask for a challenge on “{section}” and answer it first; the model text comes after one answered round.",
+        "model_gate_answers": "❓ Answer the open questions on “{section}” first; the model text waits for your answers.",
+        "rate_ask": "🎤 Rate yourself 1 to 5 a point, e.g. rate 8=4 13=3.",
+        "rate_ok": "✅ {n} rating(s) kept, yours:",
+        "rate_unknown": "🤔 Not a point I know: {points}. Study points run 1 to 20; the self-check points are 2, 3, 4, 8, 12, 13, 15, 16, 17, 29.",
+        "audio_rate": "_Now rate yourself, 1 to 5 a point: {points}. Reply: rate 8=4 13=3._",
+        "eval_deck": "🧠 Memory deck rebuilt in SiYuan: the thread and the skeleton, to recall out loud.",
+        "debrief_no_date": "📅 This version has no Sunday; the debrief comes after the talk is given.",
+        "debrief_too_soon": "📅 The talk is on {date}, in {days} days; the debrief comes the day after.",
+        "debrief_ask": "📝 Three answers: what landed, what did not, and 1 to 5 on each focus point. In chat: debrief what landed | what did not | 8=4 14=2.",
+        "debrief_ok": "📝 *Debrief kept for “{name}”.* The talk is marked given.",
+        "debrief_rate_focus": "Still to rate, 1 to 5: {points}. Reply: rate 8=4.",
+        "debrief_next": "Next: mark a point mastered once you own it (mark mastered 8), and look at your progress.",
+        "mastered_ask": "🏁 Which study point, 1 to 20? E.g. mark mastered 8.",
+        "mastered_needs_debrief": "🏁 Mastery comes after the debrief of the talk; give the three answers first.",
+        "mastered_ok": "🏁 Marked mastered: {point}. The congregation's counsel will say the rest.",
+        "progress_none": "📈 No record yet. Progress starts with a focus, an evaluation or a rehearsal rating.",
+        "progress_title": "📈 *Your progress, by study point*",
+        "progress_focused": "focus {n}×",
+        "progress_score": "text {score}/5",
+        "progress_self": "yourself {score}/5",
+        "progress_mastered": "mastered {date}",
         "export_ok": "✅ *Manuscript assembled for “{name}”*\nSee it in SiYuan: {url}\n\nNext: memory cards (Study tools › Anki deck), or notes in SiYuan.",
         "export_failed": "⚠️ I could not assemble the manuscript for “{name}”.",
         "cost": "💰 *AI spending this session*\nWords in: {prompt:,}\nWords out: {completion:,}\nTotal: {total:,}\nEstimate: ~${usd:.4f}",

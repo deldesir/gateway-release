@@ -33,7 +33,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from loguru import logger
 
@@ -140,21 +140,44 @@ def _key_dates(now: datetime) -> tuple[list[tuple[datetime, str]], str | None]:
         return [], None
 
 
+def _utcnow() -> datetime:
+    """Naive UTC, the convention of every timestamp in the stores."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _prep_lines(revisions, today: date) -> list[str]:
+    """One line per talk worth a glance this morning: a delivery Sunday still ahead, nearest
+    first, with the days to go; then revisions with no date, newest first. Delivered talks are silent."""
+    from app.jobs.talk_nudge import delivery_date, is_delivered
+
+    ahead, undated = [], []
+    for rev in revisions:
+        d = delivery_date(rev)
+        if d is None:
+            undated.append(rev)
+        elif not is_delivered(rev, today):
+            ahead.append((d, rev))
+
+    def label(rev):
+        talk = getattr(rev, "talk", None)
+        return (getattr(talk, "theme", None) or getattr(talk, "name", None) or "") if talk else ""
+
+    lines = [f"`{rev.version_name}` — {label(rev)} — {(d - today).days} days to go"
+             for d, rev in sorted(ahead, key=lambda x: x[0])]
+    lines += [f"`{rev.version_name}` — {label(rev)}" for rev in undated]
+    return lines[:5]
+
+
 def _prep_state() -> list[str]:
     try:
         from app.graph.tools.talkprep import _get_talkmaster_session
         from talkmaster.database import Revision
         session, engine = _get_talkmaster_session()
         try:
-            cutoff = datetime.utcnow() - timedelta(days=45)
-            lines = []
-            for rev in (session.query(Revision)
-                        .filter(Revision.timestamp >= cutoff)
-                        .order_by(Revision.timestamp.desc()).limit(5)):
-                lines.append(
-                    f"`{rev.version_name}` — {rev.talk.theme or rev.talk.name}"
-                )
-            return lines
+            cutoff = _utcnow() - timedelta(days=45)
+            revs = (session.query(Revision).filter(Revision.timestamp >= cutoff)
+                    .order_by(Revision.timestamp.desc()).limit(20).all())
+            return _prep_lines(revs, date.today())
         finally:
             session.close()
             engine.dispose()

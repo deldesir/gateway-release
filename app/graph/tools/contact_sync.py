@@ -1592,6 +1592,40 @@ def _pick(choice: str, options: list):
     return options[int(choice) - 1] if choice.isdigit() and 1 <= int(choice) <= len(options) else None
 
 
+def _is_operator(urn: str) -> bool:
+    """The operator's own identities (ADMIN_PHONE: a number, an address), by the rule the other
+    tools use: a number by its digits, an address as it is."""
+    value = (urn or "").split(":", 1)[-1].strip().lstrip("+")
+    digits = "".join(c for c in value if c.isdigit())
+    for entry in (x.strip() for x in os.getenv("ADMIN_PHONE", "").split(",")):
+        if not entry:
+            continue
+        if "@" in entry:
+            if value.lower() == entry.lower():
+                return True
+        elif digits and digits == "".join(c for c in entry if c.isdigit()):
+            return True
+    return False
+
+
+def _router_reply(urn: str, text: str) -> str:
+    """The router's deterministic answer to a line the operator typed outside a door: the
+    TalkPrep brain's reply when it knows the line, else nothing. No model is reached from here,
+    and a persona switch the brain would propose is not followed."""
+    try:
+        import httpx
+        from app.api.middleware.rivebot_client import RIVEBOT_URL
+
+        resp = httpx.post(f"{RIVEBOT_URL}/match", json={"message": text, "persona": "talkprep", "user": urn},
+                          timeout=15.0)
+        data = resp.json() if resp.status_code == 200 else {}
+        if data.get("matched") and not (data.get("context") or {}).get("switch_persona"):
+            return str(data.get("response") or "")
+    except Exception as e:  # noqa: BLE001
+        logger.debug(f"[contact_sync] router pass failed: {e}")
+    return ""
+
+
 def macro_sync_dialog(args: dict, **kwargs) -> str:
     """One turn of the directory menu, for the RapidPro flow that relays it.
 
@@ -1660,7 +1694,10 @@ def macro_sync_dialog(args: dict, **kwargs) -> str:
         # operator's own WhatsApp, and a colleague writing to a person must
         # never be answered by a menu. `menu`, `sync`, a number or a tapped
         # row are the only ways in; the first `menu` carries the welcome.
-        return out("")
+        # The operator alone gets one more reading: a verb the router knows
+        # (the talk-preparation loop) is answered here, deterministically; the
+        # model stays behind its own door.
+        return out(_router_reply(urn, text) if _is_operator(urn) else "")
     if step.startswith(("ict_", "dir_")):
         if _is_back(text, lang) and not step.startswith("ict_opened"):
             return show_home()

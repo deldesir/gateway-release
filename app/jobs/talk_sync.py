@@ -26,10 +26,12 @@ Run: /opt/iiab/ai-gateway/.venv/bin/python -m app.jobs.talk_sync
 import json
 import os
 import sys
+from datetime import date, timedelta
 
 from loguru import logger
 
 MAX_WEEKS = 8
+FEED_THIN_DAYS = 14   # a preparation needs at least this many days; the export must reach further
 
 
 def _die(msg: str) -> None:
@@ -50,6 +52,26 @@ def _fetch_upcoming_talks() -> list[dict]:
     if "error" in data:
         _die(f"Organized query failed: {data['error']}")
     return data.get("talks", [])
+
+
+def feed_warning(talks: list[dict], today: date) -> str | None:
+    """The schedule export is the only feed. When its newest numbered talk is under two weeks
+    ahead, a preparation would start late or not at all; say so in the log."""
+    sundays = []
+    for t in talks:
+        if not t.get("talk_number"):
+            continue
+        try:
+            sundays.append(date.fromisoformat(str(t.get("week_of")).replace("/", "-")) + timedelta(days=6))
+        except ValueError:
+            continue
+    if not sundays:
+        return "Talk sync: the schedule export lists no talk with an outline number; the feed may be stale."
+    newest = max(sundays)
+    if (newest - today).days < FEED_THIN_DAYS:
+        return (f"Talk sync: the newest numbered talk in the export is on {newest.isoformat()}, "
+                f"under {FEED_THIN_DAYS} days ahead; re-export the schedule.")
+    return None
 
 
 def _version_name(talk_number, week_of: str) -> str:
@@ -118,6 +140,9 @@ def main() -> None:
     pub_code = (os.getenv("TALK_SYNC_PUB") or "s34").strip().lower()
 
     talks = _fetch_upcoming_talks()
+    warning = feed_warning(talks, date.today())
+    if warning:
+        logger.warning(warning)
     mine = [
         t for t in talks
         if speaker_match in (t.get("speaker") or "").lower()
@@ -140,7 +165,8 @@ def main() -> None:
         )
         return
 
-    from app.graph.tools.talkprep import _get_talkmaster_session, create_revision
+    from app.graph.tools.talkprep import _get_talkmaster_session
+    from app.graph.tools.talkprep_loop import prepare_revision
     from talkmaster.database import Revision
 
     session, engine = _get_talkmaster_session()
@@ -164,19 +190,15 @@ def main() -> None:
                 logger.warning(f"Talk sync: talk No {number} not found in corpus")
                 continue
 
-            # Reuse the full tool path — persona, canvases, SiYuan structure.
-            result = create_revision({
-                "version_name": version,
-                "audience_description": "Local congregation audience",
-                "language": language,
-                "active_talk_id": str(talk.id),
-            })
-            if not result.startswith("✅"):
-                logger.warning(f"Talk sync: create_revision('{version}'): {result}")
+            # The same start as the chat verb: the revision named by its week, dated, with its canvases.
+            sunday = date.fromisoformat(str(week_of).replace("/", "-")) + timedelta(days=6)
+            state, value = prepare_revision(session, talk, sunday, language)
+            if state != "created":
+                logger.warning(f"Talk sync: prepare('{version}'): {state}: {value}")
                 continue
 
-            logger.info(f"Talk sync: created revision '{version}' for {week_of}")
-            created.append(f"• week {week_of} — *No {number}* ({version})")
+            logger.info(f"Talk sync: created revision '{value}' for {week_of}")
+            created.append(f"• week {week_of} — *No {number}* ({value})")
     finally:
         session.close()
 

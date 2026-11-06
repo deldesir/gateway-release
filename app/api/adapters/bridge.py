@@ -172,6 +172,16 @@ def model_available() -> bool:
 
 
 async def handle_message(digits: str, text: str, kind: str = "text") -> None:
+    """The bridge path: decide, then send through the bridge."""
+    out = await answer(digits, text, kind)
+    if out is not None:
+        await send(digits, out)
+
+
+async def answer(digits: str, text: str, kind: str = "text") -> dict | None:
+    """The doors, in order, for one message from a bound number: the reply to send ({text, next,
+    replies}), or None when the line stays silent. Shared by the bridge path and the retail_line
+    tool a RapidPro flow calls; the per-number state (dialog step, session, hint) lives here."""
     user_id = f"whatsapp:{digits}"
     lang = _lang(digits)
     state = _state()
@@ -179,8 +189,7 @@ async def handle_message(digits: str, text: str, kind: str = "text") -> None:
     now = time.time()
     low = retail._fold(text)
     if kind == "other":
-        await send(digits, {"text": NOT_TEXT.get(lang, NOT_TEXT["ht"]), "next": me.get("step", ""), "replies": []})
-        return
+        return {"text": NOT_TEXT.get(lang, NOT_TEXT["ht"]), "next": me.get("step", ""), "replies": []}
     # 1. the dialog: open, or in progress
     in_dialog = bool(me.get("step")) and now - float(me.get("at", 0)) < DIALOG_MINUTES * 60
     if in_dialog or low in retail_dialog.MENU_WORDS:
@@ -190,45 +199,38 @@ async def handle_message(digits: str, text: str, kind: str = "text") -> None:
             me.pop("step", None)
         state[digits] = me
         _save(state)
-        await send(digits, out)
-        return
+        return out
     # 2. a verb
     from app.api.middleware.rivebot_client import match_intent
     reply, _ctx = await match_intent(text, PERSONA, user_id)
     if reply and reply.strip():
-        await send(digits, {"text": reply, "next": "", "replies": []})
-        return
+        return {"text": reply, "next": "", "replies": []}
     # 3. the session word, bounded
     session_open = now - float(me.get("session", 0)) < SESSION_MINUTES * 60
     if low in CLOSE_WORDS and session_open:
         me.pop("session", None)
         state[digits] = me
         _save(state)
-        await send(digits, {"text": CLOSED.get(lang, CLOSED["ht"]), "next": "", "replies": []})
-        return
+        return {"text": CLOSED.get(lang, CLOSED["ht"]), "next": "", "replies": []}
     if low in SESSION_WORDS:
         if not model_available():
-            await send(digits, {"text": NO_MODEL.get(lang, NO_MODEL["ht"]), "next": "", "replies": []})
-            return
+            return {"text": NO_MODEL.get(lang, NO_MODEL["ht"]), "next": "", "replies": []}
         me["session"] = now
         state[digits] = me
         _save(state)
-        await send(digits, {"text": OPENED.get(lang, OPENED["ht"]).format(m=SESSION_MINUTES), "next": "", "replies": []})
-        return
+        return {"text": OPENED.get(lang, OPENED["ht"]).format(m=SESSION_MINUTES), "next": "", "replies": []}
     if session_open and model_available():
         me["session"] = now
         state[digits] = me
         _save(state)
-        answer = await chat(user_id, text)
-        if answer:
-            await send(digits, answer)
-        return
+        return await chat(user_id, text)          # None when the model has nothing to say: the line stays silent
     # 4. the hint, once an hour
     if now - float(me.get("hint", 0)) >= HINT_MINUTES * 60:
         me["hint"] = now
         state[digits] = me
         _save(state)
-        await send(digits, {"text": HINT.get(lang, HINT["ht"]), "next": "", "replies": []})
+        return {"text": HINT.get(lang, HINT["ht"]), "next": "", "replies": []}
+    return None
 
 
 async def chat(user_id: str, text: str) -> dict | None:

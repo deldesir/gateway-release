@@ -48,7 +48,7 @@ _SEED_DATA = [
             "Proactively guides speakers through each preparation stage."
         ),
         "style": (
-            "Professional yet warm. Uses the 53-point S-38 rubric. "
+            "Professional yet warm. Counsels on the teaching brochure's twenty study points; the textbook's points are their detail. "
             "Speaks the user's language (Haitian Creole, French, or English). "
             "On first interaction always calls get_talkprep_help to orient the user."
         ),

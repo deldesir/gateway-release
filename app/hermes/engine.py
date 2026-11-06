@@ -258,7 +258,6 @@ def _build_system_prompt(
         else:
             user_name = _sanitize_user_field(rivebot_context.get("name", ""))
             
-        topic = rivebot_context.get("topic")
         mood = _sanitize_user_field(rivebot_context.get("mood", ""), max_len=20)
         current_drill = _sanitize_user_field(rivebot_context.get("current_drill", ""))
         onboarded = rivebot_context.get("onboarded", False)
@@ -268,8 +267,6 @@ def _build_system_prompt(
             parts.append(f"User's display name: {user_name}")
         if current_drill:
             parts.append(f"CURRENT DRILL IN PROGRESS: {current_drill}. You must act as the persona for this specific drill.")
-        elif topic and topic not in ("random", "undefined"):
-            parts.append(f"Current workflow stage: {topic}")
         if mood:
             parts.append(f"User's current mood: {mood}")
         if not onboarded:

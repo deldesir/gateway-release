@@ -256,8 +256,9 @@ CHALLENGE_SECTION = {
     "name": "challenge_section",
     "description": (
         "Socratic coaching on the SPEAKER'S OWN draft — the PRIMARY section "
-        "workflow. Never writes prose: it cites weak rubric points in the "
-        "speaker's draft, asks questions they must answer in writing, and "
+        "workflow. Never writes prose: it names the study points weak in the "
+        "speaker's draft (the teaching brochure's twenty, the textbook's points "
+        "as their sub-criteria), asks questions they must answer in writing, and "
         "issues out-loud speaking challenges. Requires the speaker's draft "
         "in the section's SiYuan canvas ('✍️ My Draft for This Section'). "
         "Use this whenever the user wants to work on, improve, or develop a "
@@ -289,39 +290,11 @@ CHALLENGE_SECTION = {
     }
 }
 
-DEVELOP_SECTION = {
-    "name": "develop_section",
-    "description": "Generate the AI *reference* manuscript for a section — compare-only, and GATED: it unlocks only after the speaker's own draft exists in the canvas. The speaker studies it against their draft; it is never delivered as-is. For coaching on a draft, prefer challenge_section.\n\nArgs:\n    section_title: Title of the section (partial match OK).\n    active_revision: Infer this from previous tool outputs in memory.\n\nReturns:\n    Confirmation or status of the generated reference.",
-    "parameters": {
-        "description": "Generate the AI reference manuscript for a section (compare-only, gated on the speaker's own draft).",
-        "properties": {
-            "section_title": {
-                "type": "string"
-            },
-            "active_revision": {
-                "anyOf": [
-                    {
-                        "type": "string"
-                    },
-                    {
-                        "type": "null"
-                    }
-                ],
-                "default": None
-            }
-        },
-        "required": [
-            "section_title"
-        ],
-        "type": "object"
-    }
-}
-
 EVALUATE_TALK = {
     "name": "evaluate_talk",
-    "description": "Evaluate the SPEAKER'S OWN manuscript (harvested from the section canvases) against the text-assessable rubric points, with quoted evidence per score. REQUIRES self_score: ALWAYS ask the speaker for their honest overall score (1-10) BEFORE calling this \u2014 the self-vs-AI calibration is part of the training.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override (from AI/direct call).\n    self_score: The speaker's own overall score 1-10 (ask them first).",
+    "description": "Evaluate the SPEAKER'S OWN manuscript (harvested from the section canvases) on the teaching brochure's study points: the seventeen a written draft can show, each with a quoted excerpt and its textbook sub-criteria. REQUIRES self_score: ALWAYS ask the speaker for their honest overall score (1-10) BEFORE calling this \u2014 the self-vs-AI calibration is part of the training.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override (from AI/direct call).\n    self_score: The speaker's own overall score 1-10 (ask them first).",
     "parameters": {
-        "description": "Evaluate the SPEAKER'S OWN manuscript (harvested from the section canvases) against the text-assessable rubric points, with quoted evidence per score. REQUIRES self_score: ALWAYS ask the speaker for their honest overall score (1-10) BEFORE calling this \u2014 the self-vs-AI calibration is part of the training.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override (from AI/direct call).\n    self_score: The speaker's own overall score 1-10 (ask them first).",
+        "description": "Evaluate the SPEAKER'S OWN manuscript (harvested from the section canvases) on the teaching brochure's study points: the seventeen a written draft can show, each with a quoted excerpt and its textbook sub-criteria. REQUIRES self_score: ALWAYS ask the speaker for their honest overall score (1-10) BEFORE calling this \u2014 the self-vs-AI calibration is part of the training.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override (from AI/direct call).\n    self_score: The speaker's own overall score 1-10 (ask them first).",
         "properties": {
             "self_score": {
                 "type": "number",
@@ -357,9 +330,9 @@ EVALUATE_TALK = {
 
 GET_EVALUATION_SCORES = {
     "name": "get_evaluation_scores",
-    "description": "Get S-38 rubric evaluation scores for a talk revision.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override.\n\nReturns:\n    Scores broken down by S-38 category with coaching tips.",
+    "description": "The latest evaluation's scores by study point for a talk revision.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override.\n\nReturns:\n    One line per study point with the sub-criteria found weak, the overall, and the two points to work on next.",
     "parameters": {
-        "description": "Get S-38 rubric evaluation scores for a talk revision.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override.\n\nReturns:\n    Scores broken down by S-38 category with coaching tips.",
+        "description": "The latest evaluation's scores by study point for a talk revision.\n\nArgs:\n    active_revision: Infer this from previous tool outputs in memory.\n    revision_name: Explicit override.\n\nReturns:\n    One line per study point with the sub-criteria found weak, the overall, and the two points to work on next.",
         "properties": {
             "active_revision": {
                 "anyOf": [
@@ -1890,6 +1863,20 @@ RETAIL_RECORD_PAYMENT = {
     },
 }
 
+RETAIL_LINE = {
+    "name": "retail_line",
+    "description": ("The retail line for a box whose flow engine carries WhatsApp: one incoming message in, the line's reply out "
+                    "(the shop dialog, a verb, the model session or the hint, in that order). Used by the box's catch-all flow."),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "text": {"type": "string", "description": "What the person tapped or typed."},
+            "attachments": {"type": "string", "description": "Non-empty when the message carried media and no text."},
+        },
+        "required": [],
+    },
+}
+
 RETAIL_DIALOG = {
     "name": "retail_dialog",
     "description": ("The shop dialog: a menu of what the shop's box can show, driven step by step by taps. Used by the flow that carries it and by the box's bridge adapter; not for a model turn."),
@@ -1903,3 +1890,149 @@ RETAIL_DIALOG = {
     },
 }
 
+
+
+PREPARE_TALK = {
+    "name": "prepare_talk",
+    "description": "Start preparing a talk for a Sunday (the loop's first step): the revision named by its week, dated, with its canvases. Args: talk (the outline number), sunday (the date, moved to its Sunday), language (optional).",
+    "parameters": {
+        "description": "Start preparing a talk for a Sunday (the loop's first step): the revision named by its week, dated, with its canvases. Args: talk (the outline number), sunday (the date, moved to its Sunday), language (optional).",
+        "properties": {
+            "talk": {"type": "string", "description": "The talk's number, as it is on the outline."},
+            "sunday": {"type": "string", "description": "The day the talk is given, YYYY-MM-DD."},
+            "language": {"type": "string", "description": "ht, en or fr (optional)."}
+        },
+        "required": ["talk", "sunday"],
+        "type": "object"
+    }
+}
+
+SET_FOCUS = {
+    "name": "set_focus",
+    "description": "Choose one or two study points (1 to 20) to work on for the active talk, e.g. '8 12', or '8.45' to sharpen a point to one textbook sub-criterion. With no points, proposes a default from the last debrief. The speaker chooses; never choose for them.",
+    "parameters": {
+        "description": "Choose one or two study points (1 to 20) to work on for the active talk, e.g. '8 12', or '8.45' to sharpen a point to one textbook sub-criterion. With no points, proposes a default from the last debrief. The speaker chooses; never choose for them.",
+        "properties": {
+            "points": {"type": "string", "description": "The study points, e.g. '8 12' or '8.45'."},
+            "active_revision": {"type": "string", "description": "Infer this from previous tool outputs in memory."}
+        },
+        "required": [],
+        "type": "object"
+    }
+}
+
+DRAFT_SECTION = {
+    "name": "draft_section",
+    "description": "Add the speaker's own words to a part's draft from the phone: they land in the draft area of the part's canvas. Never write the words for the speaker.",
+    "parameters": {
+        "description": "Add the speaker's own words to a part's draft from the phone: they land in the draft area of the part's canvas. Never write the words for the speaker.",
+        "properties": {
+            "section_title": {"type": "string", "description": "The part, by number or by a word of its title."},
+            "text": {"type": "string", "description": "The speaker's words to add."},
+            "active_revision": {"type": "string", "description": "Infer this from previous tool outputs in memory."}
+        },
+        "required": ["section_title", "text"],
+        "type": "object"
+    }
+}
+
+ANSWER_CHALLENGE = {
+    "name": "answer_challenge",
+    "description": "Record the speaker's written answer to one open question of the last challenge on a part (1 is the first still blank). The debt shrinks; the model text unlocks when none is left.",
+    "parameters": {
+        "description": "Record the speaker's written answer to one open question of the last challenge on a part (1 is the first still blank). The debt shrinks; the model text unlocks when none is left.",
+        "properties": {
+            "section_title": {"type": "string", "description": "The part."},
+            "n": {"type": "integer", "description": "Which open question, 1-based."},
+            "text": {"type": "string", "description": "The speaker's answer."},
+            "active_revision": {"type": "string", "description": "Infer this from previous tool outputs in memory."}
+        },
+        "required": ["section_title", "text"],
+        "type": "object"
+    }
+}
+
+MODEL_SECTION = {
+    "name": "model_section",
+    "description": "The model text for a part, for comparison and never for delivery. GATED: it unlocks only after the speaker's own draft and one challenge round with every question answered; it goes to the part's coaching log. Use last, never first.",
+    "parameters": {
+        "description": "The model text for a part, for comparison and never for delivery. GATED: it unlocks only after the speaker's own draft and one challenge round with every question answered; it goes to the part's coaching log. Use last, never first.",
+        "properties": {
+            "section_title": {"type": "string", "description": "The part."},
+            "active_revision": {"type": "string", "description": "Infer this from previous tool outputs in memory."}
+        },
+        "required": ["section_title"],
+        "type": "object"
+    }
+}
+
+SELF_RATE = {
+    "name": "self_rate",
+    "description": "Record the speaker's own 1-to-5 ratings after a rehearsal, e.g. '8:4 13:3': study points (1 to 20) or the self-check textbook points (2, 3, 4, 8, 12, 13, 15, 16, 17, 29). The assistant never scores what it cannot hear.",
+    "parameters": {
+        "description": "Record the speaker's own 1-to-5 ratings after a rehearsal, e.g. '8:4 13:3': study points (1 to 20) or the self-check textbook points (2, 3, 4, 8, 12, 13, 15, 16, 17, 29). The assistant never scores what it cannot hear.",
+        "properties": {
+            "ratings": {"type": "string", "description": "Pairs like '8:4 13:3'."},
+            "active_revision": {"type": "string", "description": "Infer this from previous tool outputs in memory."}
+        },
+        "required": ["ratings"],
+        "type": "object"
+    }
+}
+
+DEBRIEF_TALK = {
+    "name": "debrief_talk",
+    "description": "After the talk is given: what landed, what did not, and 1 to 5 on each focus point. Only once the Sunday has come; marks the talk delivered. Ask the three questions first if any answer is missing.",
+    "parameters": {
+        "description": "After the talk is given: what landed, what did not, and 1 to 5 on each focus point. Only once the Sunday has come; marks the talk delivered. Ask the three questions first if any answer is missing.",
+        "properties": {
+            "text": {"type": "string", "description": "The one-line form from chat: what landed | what did not | 8=4 14=2."},
+            "landed": {"type": "string", "description": "What landed."},
+            "did_not": {"type": "string", "description": "What did not."},
+            "ratings": {"type": "string", "description": "Optional: '8:4 14:2' on the focus points."},
+            "active_revision": {"type": "string", "description": "Infer this from previous tool outputs in memory."}
+        },
+        "required": [],
+        "type": "object"
+    }
+}
+
+MARK_MASTERED = {
+    "name": "mark_mastered",
+    "description": "Mark a study point mastered. Only the speaker decides this, and only after the debrief of the talk.",
+    "parameters": {
+        "description": "Mark a study point mastered. Only the speaker decides this, and only after the debrief of the talk.",
+        "properties": {
+            "point": {"type": "string", "description": "The study point, 1 to 20."},
+            "active_revision": {"type": "string", "description": "Infer this from previous tool outputs in memory."}
+        },
+        "required": ["point"],
+        "type": "object"
+    }
+}
+
+ACTIVE_TALK = {
+    "name": "active_talk",
+    "description": "The talk this person is working on, as one line (its number and title), or nothing when no talk is chosen. The menus ask for a talk only when this is empty.",
+    "parameters": {
+        "description": "The talk this person is working on, one line, or nothing.",
+        "properties": {
+
+        },
+        "required": [],
+        "type": "object"
+    }
+}
+
+MY_PROGRESS = {
+    "name": "my_progress",
+    "description": "Where the speaker stands, study point by study point: how often it was a focus, the last score on the text, the last self-rating, the day it was marked mastered.",
+    "parameters": {
+        "description": "Where the speaker stands, study point by study point: how often it was a focus, the last score on the text, the last self-rating, the day it was marked mastered.",
+        "properties": {
+
+        },
+        "required": [],
+        "type": "object"
+    }
+}

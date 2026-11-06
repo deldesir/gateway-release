@@ -4,6 +4,7 @@ from tools.registry import registry
 from app.hermes.engine import _current_urn
 import app.hermes.schemas as schemas
 from app.graph.tools import rapidpro, mocks, talkprep, forms, upload, system, config
+from app.graph.tools import talkprep_loop
 from app.graph.tools import organized
 from app.graph.tools import capture
 import app.plugins.social.schemas as social_schemas
@@ -704,6 +705,8 @@ def register_all_tools() -> None:
         registry.register(_name, "retail", getattr(schemas, _name.upper()), getattr(retail_tools, _name))
     from app.graph.tools import retail_dialog as retail_dialog_tool
     registry.register("retail_dialog", "retail", schemas.RETAIL_DIALOG, retail_dialog_tool.retail_dialog)
+    from app.graph.tools import retail_line as retail_line_tool
+    registry.register("retail_line", "retail", schemas.RETAIL_LINE, retail_line_tool.retail_line)
 
     # ERPNext read-only business view (operator persona only via toolset "erpnext")
     from app.graph.tools import erpnext as erpnext_tools
@@ -760,13 +763,14 @@ def register_all_tools() -> None:
     # TalkPrep Tools
     registry.register("get_talkprep_help", "talkprep", schemas.GET_TALKPREP_HELP, talkprep.get_talkprep_help)
     registry.register("talkmaster_status", "talkprep", schemas.TALKMASTER_STATUS, talkprep.talkmaster_status)
+    registry.register("active_talk", "talkprep", schemas.ACTIVE_TALK, talkprep.active_talk)
     registry.register("select_active_talk", "talkprep", schemas.SELECT_ACTIVE_TALK, talkprep.select_active_talk)
     registry.register("list_publications", "talkprep", schemas.LIST_PUBLICATIONS, talkprep.list_publications)
     registry.register("list_topics", "talkprep", schemas.LIST_TOPICS, talkprep.list_topics)
     registry.register("import_talk", "talkprep", schemas.IMPORT_TALK, talkprep.import_talk)
     registry.register("create_revision", "talkprep", schemas.CREATE_REVISION, talkprep.create_revision)
     registry.register("challenge_section", "talkprep", schemas.CHALLENGE_SECTION, talkprep.challenge_section)
-    registry.register("develop_section", "talkprep", schemas.DEVELOP_SECTION, talkprep.develop_section)
+    registry.register("model_section", "talkprep", schemas.MODEL_SECTION, talkprep_loop.model_section)
     registry.register("set_golden_thread", "talkprep", schemas.SET_GOLDEN_THREAD, talkprep.set_golden_thread)
     registry.register("evaluate_talk", "talkprep", schemas.EVALUATE_TALK, talkprep.evaluate_talk)
     registry.register("get_evaluation_scores", "talkprep", schemas.GET_EVALUATION_SCORES, talkprep.get_evaluation_scores)
@@ -776,6 +780,15 @@ def register_all_tools() -> None:
     registry.register("cost_report", "talkprep", schemas.COST_REPORT, talkprep.cost_report)
     registry.register("generate_anki_deck", "talkprep", schemas.GENERATE_ANKI_DECK, talkprep.generate_anki_deck)
     registry.register("push_to_siyuan", "talkprep", schemas.PUSH_TO_SIYUAN, talkprep.push_to_siyuan)
+    # the loop (D-012): start, anchor, draft, answer, rate, debrief, mastery, progress
+    registry.register("prepare_talk", "talkprep", schemas.PREPARE_TALK, talkprep_loop.prepare_talk)
+    registry.register("set_focus", "talkprep", schemas.SET_FOCUS, talkprep_loop.set_focus)
+    registry.register("draft_section", "talkprep", schemas.DRAFT_SECTION, talkprep_loop.draft_section)
+    registry.register("answer_challenge", "talkprep", schemas.ANSWER_CHALLENGE, talkprep_loop.answer_challenge)
+    registry.register("self_rate", "talkprep", schemas.SELF_RATE, talkprep_loop.self_rate)
+    registry.register("debrief_talk", "talkprep", schemas.DEBRIEF_TALK, talkprep_loop.debrief_talk)
+    registry.register("mark_mastered", "talkprep", schemas.MARK_MASTERED, talkprep_loop.mark_mastered)
+    registry.register("my_progress", "talkprep", schemas.MY_PROGRESS, talkprep_loop.my_progress)
 
     # MemPalace Tools
     registry.register("search_memory", "mempalace", SEARCH_MEMORY_SCHEMA, search_memory)

@@ -30,7 +30,7 @@ from loguru import logger
 KNOWN_KEYWORDS = {
     1: {"support", "sales", "ops", "prep", "train", "ai", "alva", "lang", "reglaj", "settings", "paramet", "paramèt"},
     3: {"sync", "kontak", "contacts", "menu", "meni", "reglaj", "settings", "paramet", "paramèt",
-        "boutik", "shop", "magasin", "magazen", "ai", "alva", "pale"},
+        "boutik", "shop", "magasin", "magazen", "ai", "alva", "pale", "prep"},
 }
 # Which workspaces' flows call each dialog tool (the live check derives this from the flows).
 KNOWN_DIALOG_ORGS = {"settings_dialog": {1, 3}, "contact_sync_dialog": {3}, "retail_dialog": {3}}

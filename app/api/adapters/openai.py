@@ -77,7 +77,61 @@ async def _verify_api_key(raw_request: Request):
 
 # In-memory cache: user_id → preferred persona slug
 # Set when {{persona_switch}} fires, checked before channel default.
-_user_persona: Dict[str, str] = {}
+class _PersistedPrefs(dict):
+    """The persona each person last chose or was switched to, kept on disk so a restart does
+    not drop everyone back on the default persona. Best effort: a failed write is logged, never
+    raised; a missing or unreadable file is an empty preference set."""
+
+    def __init__(self, path: str):
+        super().__init__()
+        self._path = path
+        try:
+            import json as _json
+            with open(path, encoding="utf-8") as fh:
+                data = _json.load(fh)
+            if isinstance(data, dict):
+                self.update({str(k): str(v) for k, v in data.items() if isinstance(v, str)})
+        except (OSError, ValueError):
+            pass
+
+    def _save(self) -> None:
+        try:
+            import json as _json
+            os.makedirs(os.path.dirname(self._path) or ".", exist_ok=True)
+            tmp = self._path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as fh:
+                _json.dump(dict(self), fh, ensure_ascii=False, indent=0, sort_keys=True)
+            os.replace(tmp, self._path)
+        except OSError as e:
+            logger.warning(f"Persona preferences not saved: {e}")
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        self._save()
+
+    def __delitem__(self, key):
+        super().__delitem__(key)
+        self._save()
+
+
+_user_persona: Dict[str, str] = _PersistedPrefs(os.getenv("PERSONA_PREFS_FILE", "data/persona_prefs.json"))
+
+
+async def _talkprep_second_pass(user_id: str, message: str) -> Optional[str]:
+    """The TalkPrep brain's reply to a line another persona's brain missed, for a person
+    that brain admits; None for anyone else, for a miss, and for a persona switch the
+    brain would propose (only a matched verb is followed from here)."""
+    from app.graph.prompts import PersonaPromptRegistry
+
+    persona = await PersonaPromptRegistry.get_async("talkprep") or {}
+    if user_id not in (persona.get("allowed_urns") or []):
+        return None
+    from app.api.middleware.rivebot_client import match_intent
+
+    reply, context = await match_intent(message, "talkprep", user_id)
+    if reply is None or (context or {}).get("switch_persona"):
+        return None
+    return reply
 
 # ── Session file persistence for cross-tier continuity (F-14) ─────────────────
 import json
@@ -678,7 +732,7 @@ async def openai_chat_completions(
         return _openai_response(model_persona, capture_reply, id_prefix="chatcmpl-capture")
 
     from app.api.middleware.rivebot_client import match_intent, set_var, set_vars
-    rivebot_context = {}
+    intent_response, rivebot_context = None, {}
     try:
         # Inject WhatsApp contact name if available (skips onboarding name question)
         if parsed.contact_name:
@@ -788,6 +842,24 @@ async def openai_chat_completions(
     except Exception as e:
         logger.error(f"Rivebot match error: {e}")
         # On error, safely fall through to Hermes Agent
+
+    # ── 4.5 The talk-preparation brain, asked second (zero tokens) ───────────
+    # The loop's verbs live in the TalkPrep brain. Typed on another persona by a
+    # person that brain admits ("prepare diskou 75 pou 2026-12-27", "defi seksyon
+    # 1"), they are matched there before any model turn and the persona follows
+    # the verb; a line the brain does not know falls through unchanged.
+    if intent_response is None and model_persona != "talkprep":
+        try:
+            second = await _talkprep_second_pass(user_id, last_user_message.lstrip("#/"))
+        except Exception as e:
+            api_logger.warning(f"TalkPrep second pass failed for {user_id}: {e}")
+            second = None
+        if second is not None:
+            model_persona = "talkprep"
+            _user_persona[user_id] = "talkprep"
+            _persist_rivebot_turn(user_id, model_persona, last_user_message, second)
+            api_logger.info(f"TalkPrep verb matched on the second pass for {user_id}")
+            return _openai_response(model_persona, second, id_prefix="chatcmpl-rs")
 
     # ── 4.6 Closed-set intent for what the router missed ─────────────────────
     # One small-model call that can only pick from the known verbs (or "chat",
@@ -984,28 +1056,6 @@ async def openai_chat_completions(
                 api_logger.warning(f"Background palace write failed: {e}")
 
         asyncio.create_task(_safe_persist())
-
-    # ── 5.5 Advance RiveBot topic using tool metadata (F-23) ──────────────────
-    from app.api.middleware.rivebot_client import (
-        advance_topic_if_needed,
-        STAGE_TRANSITIONS,
-    )
-    
-    _hermes_messages = hermes_result.get("messages", [])
-    _invoked_tools = [
-        tc.get("function", {}).get("name") 
-        for m in _hermes_messages if isinstance(m, dict) and m.get("tool_calls")
-        for tc in m.get("tool_calls", [])
-    ]
-    # Fallback to string-matching if metadata is missing/incomplete
-    _mentioned_tools = [t for t in STAGE_TRANSITIONS if t in (final_text or "")]
-    _target_tools = set(_invoked_tools + _mentioned_tools)
-
-    for tool_name in STAGE_TRANSITIONS:
-        if tool_name in _target_tools:
-            api_logger.info(f"Stage transition tool '{tool_name}' detected. Evaluating advancement.")
-            await advance_topic_if_needed(tool_name, model_persona, user_id)
-            break
 
     # Token usage from Hermes (engine attaches per-turn usage from the agent's
     # session_* counters — works for the native-Gemini path). Guard for the
